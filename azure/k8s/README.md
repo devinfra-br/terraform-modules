@@ -2,6 +2,69 @@
 
 This module automates the deployment of an Azure Kubernetes Service (AKS) cluster along with necessary resources like Log Analytics, network security groups, and more.
 
+# List of Azure locations in markdown format for output in a file
+
+## Links Azure 
+
+Link vmsize
+link well architech framework azure
+link learing azure terraform
+
+## Recomendation and best pratice
+
+## Azure Locations for Terraform
+
+Below is a list of Azure locations that can be used in Terraform configurations:
+
+- **East US**: `eastus`
+- **East US 2**: `eastus2`
+- **Central US**: `centralus`
+- **North Central US**: `northcentralus`
+- **South Central US**: `southcentralus`
+- **West US**: `westus`
+- **West US 2**: `westus2`
+- **West US 3**: `westus3`
+- **Canada Central**: `canadacentral`
+- **Canada East**: `canadaeast`
+- **Brazil South**: `brazilsouth`
+- **Brazil Southeast**: `brazilsoutheast`
+- **West Europe**: `westeurope`
+- **North Europe**: `northeurope`
+- **UK South**: `uksouth`
+- **UK West**: `ukwest`
+- **France Central**: `francecentral`
+- **France South**: `francesouth`
+- **Germany West Central**: `germanywestcentral`
+- **Germany North**: `germanynorth`
+- **Switzerland North**: `switzerlandnorth`
+- **Switzerland West**: `switzerlandwest`
+- **Australia East**: `australiaeast`
+- **Australia Southeast**: `australiasoutheast`
+- **Australia Central**: `australiacentral`
+- **Japan East**: `japaneast`
+- **Japan West**: `japanwest`
+- **Korea Central**: `koreacentral`
+- **Korea South**: `koreasouth`
+- **Southeast Asia**: `southeastasia`
+- **East Asia**: `eastasia`
+- **India Central**: `centralindia`
+- **India South**: `southindia`
+- **India West**: `westindia`
+- **UAE North**: `uaenorth`
+- **UAE Central**: `uaecentral`
+- **South Africa North**: `southafricanorth`
+- **South Africa West**: `southafricawest`
+
+## Example Usage
+
+In Terraform, you can specify a location like this:
+
+```hcl
+resource "azurerm_resource_group" "example" {
+  name     = "example-resources"
+  location = "eastus"
+}
+
 ## Table of Contents
 
 - [Requirements](#requirements)
@@ -100,7 +163,4 @@ License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 Author Information
-Created by [Your Name] - [Your Contact Information]
-
-
-Esse arquivo `README.md` inclui a descrição do módulo Terraform para o AKS, juntamente com tabelas formatadas em Markdown para inputs e outputs. Você pode personalizar os campos como o nome do autor e a informação de contato conforme necessário.
+Created by Wilton Guilherme - wiltoninfra@gmail.com

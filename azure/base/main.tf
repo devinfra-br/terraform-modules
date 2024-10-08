@@ -39,3 +39,11 @@ resource "azurerm_subnet" "management" {
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = [var.subnets.data.cidr]
 }
+
+# Sub-net public
+resource "azurerm_subnet" "public" {
+  name                 = var.subnets.data.name
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = [var.subnets.data.cidr]
+}

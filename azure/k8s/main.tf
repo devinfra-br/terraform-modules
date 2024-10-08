@@ -47,12 +47,11 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
 
 
   default_node_pool {
-    name                  = "system"
-    vm_size               = var.vm_size
-    orchestrator_version  = data.azurerm_kubernetes_service_versions.current.latest_version
-    vnet_subnet_id        = var.subnet_id
-    enable_auto_scaling   = true
-    #node_count            = 2
+    name                 = "system"
+    vm_size              = var.vm_size
+    orchestrator_version = data.azurerm_kubernetes_service_versions.current.latest_version
+    vnet_subnet_id       = var.subnet_id
+    enable_auto_scaling  = true
     max_count             = var.max_node_count
     min_count             = var.min_node_count
     os_disk_size_gb       = var.os_disk_size_gb
@@ -84,12 +83,11 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   network_profile {
     network_plugin    = "azure"
     load_balancer_sku = "standard"
-
   }
-
   tags = var.tags
 }
 
+# Create the AKS node pools
 resource "azurerm_kubernetes_cluster_node_pool" "node_pools" {
   for_each              = var.node_pools
   kubernetes_cluster_id = azurerm_kubernetes_cluster.aks_cluster.id
@@ -108,6 +106,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "node_pools" {
   tags                  = each.value.tags
 }
 
+# Create the Network Security Group for the AKS
 resource "azurerm_network_security_group" "this" {
   location            = var.default_location
   name                = "${var.project}-${random_id.aksrandom_id.hex}-nsg"
@@ -115,6 +114,7 @@ resource "azurerm_network_security_group" "this" {
   tags                = var.tags
 }
 
+# Create the Network Security Group Rule for the AKS
 resource "azurerm_route_table" "rt1" {
   location            = var.default_location
   name                = "${var.project}-${random_id.aksrandom_id.hex}-rt"
@@ -122,6 +122,7 @@ resource "azurerm_route_table" "rt1" {
   tags                = var.tags
 }
 
+# Create the Network Security Group Rule for the AKS
 resource "azurerm_network_security_group" "aks" {
   name                = "securityGroupAksDefault"
   location            = var.default_location
@@ -129,6 +130,7 @@ resource "azurerm_network_security_group" "aks" {
   tags                = var.tags
 }
 
+# Create the Network Security Group Rule for the AKS
 resource "azurerm_network_security_rule" "aks-outbound" {
   name                        = "aksOutbound"
   priority                    = 100
@@ -143,6 +145,7 @@ resource "azurerm_network_security_rule" "aks-outbound" {
   network_security_group_name = azurerm_network_security_group.aks.name
 }
 
+# Create the Network Security Group Rule for the AKS
 resource "azurerm_network_security_rule" "aks-inbound" {
   name                        = "aksInbound"
   priority                    = 100
