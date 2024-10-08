@@ -27,23 +27,31 @@ variable "subnets" {
 
   default = {
     applications = {
-      name = "subnet-applications"
-      cidr = ""
-    }
-    kubernetes = {
-      name = "subnet-kubernetes"
+      name = "applications-subnet"
       cidr = ""
     }
     databases = {
-      name = "subnet-databases"
+      name = "databases-subnet"
       cidr = ""
     }
     management = {
-      name = "subnet-management"
+      name = "management-subnet"
+      cidr = ""
+    }
+    public = {
+      name = "public-subnet"
+      cidr = ""
+    }
+    kubernetes = {
+      name = "kubernetes-subnet"
       cidr = ""
     }
   }
 }
+
+
+
+
 
 variable "tags" {
   description = "Mapeamento das tags associadas ao recurso."
