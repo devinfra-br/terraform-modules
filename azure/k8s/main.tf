@@ -15,10 +15,13 @@ data "azurerm_client_config" "current" {}
 
 # Create the Log Analytics Workspace for monitoring AKS
 resource "azurerm_log_analytics_workspace" "insights" {
-  name                = "logs-${random_pet.aksrandom_pet.id}-${var.project}-${var.environment}"
-  location            = var.default_location
-  resource_group_name = var.resource_group_name
-  retention_in_days   = var.logs_retention_days
+  name                                    = "logs-${random_pet.aksrandom_pet.id}-${var.project}-${var.environment}"
+  location                                = var.default_location
+  resource_group_name                     = var.resource_group_name
+  sku                                     = "Free"
+  retention_in_days                       = var.logs_retention_days
+  immediate_data_purge_on_30_days_enabled = true
+  tags                                    = var.tags
 }
 
 # Create the Administrators group in Azure AD
@@ -47,11 +50,11 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
 
 
   default_node_pool {
-    name                 = "system"
-    vm_size              = var.vm_size
-    orchestrator_version = data.azurerm_kubernetes_service_versions.current.latest_version
-    vnet_subnet_id       = var.subnet_id
-    enable_auto_scaling  = true
+    name                  = "system"
+    vm_size               = var.vm_size
+    orchestrator_version  = data.azurerm_kubernetes_service_versions.current.latest_version
+    vnet_subnet_id        = var.subnet_id
+    enable_auto_scaling   = true
     max_count             = var.max_node_count
     min_count             = var.min_node_count
     os_disk_size_gb       = var.os_disk_size_gb
