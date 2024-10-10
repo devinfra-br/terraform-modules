@@ -18,7 +18,7 @@ resource "azurerm_log_analytics_workspace" "insights" {
   name                                    = "logs-${random_pet.aksrandom_pet.id}-${var.project}-${var.environment}"
   location                                = var.default_location
   resource_group_name                     = var.resource_group_name
-  sku                                     = "free"
+  #sku                                     = "free"
   retention_in_days                       = var.logs_retention_days
   immediate_data_purge_on_30_days_enabled = true
   tags                                    = var.tags
