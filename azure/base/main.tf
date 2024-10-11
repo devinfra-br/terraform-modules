@@ -37,7 +37,7 @@ resource "azurerm_subnet" "databases" {
       name    = "Microsoft.DBforMySQL/flexibleServers"
       actions = ["Microsoft.Network/virtualNetworks/subnets/join/action", "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action"]
     }
-  }  
+  }
 }
 
 # Sub-net management
