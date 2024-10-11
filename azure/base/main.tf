@@ -30,6 +30,14 @@ resource "azurerm_subnet" "databases" {
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = [var.subnets.databases.cidr]
+  delegation {
+    name = "delegation"
+
+    service_delegation {
+      name    = "Microsoft.DBforMySQL/flexibleServers"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/join/action", "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action"]
+    }
+  }  
 }
 
 # Sub-net management
