@@ -5,7 +5,7 @@ variable "location" {
 
 variable "resource_group_name" {
   description = "Nome do grupo de recursos"
-  default     = ""
+  default     = "rg-network"
 }
 
 variable "vnet_name" {

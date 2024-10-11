@@ -15,10 +15,9 @@ data "azurerm_client_config" "current" {}
 
 # Create the Log Analytics Workspace for monitoring AKS
 resource "azurerm_log_analytics_workspace" "insights" {
-  name                = "logs-${random_pet.aksrandom_pet.id}-${var.project}-${var.environment}"
-  location            = var.default_location
-  resource_group_name = var.resource_group_name
-  #sku                                     = "free"
+  name                                    = "logs-${random_pet.aksrandom_pet.id}-${var.project}-${var.environment}"
+  location                                = var.default_location
+  resource_group_name                     = var.resource_group_name
   retention_in_days                       = var.logs_retention_days
   immediate_data_purge_on_30_days_enabled = true
   tags                                    = var.tags
@@ -29,12 +28,9 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   name                = "${var.project}-${var.environment}-cluster-1"
   location            = var.default_location
   resource_group_name = var.resource_group_name
-  #open_service_mesh_enabled = true
-  #cost_analysis_enabled     = true
   dns_prefix          = "${var.project}-${var.environment}-cluster"
   kubernetes_version  = data.azurerm_kubernetes_service_versions.current.latest_version
   node_resource_group = "${var.project}-${var.environment}-nrg"
-
 
   default_node_pool {
     name                  = "system"
