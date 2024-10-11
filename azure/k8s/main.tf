@@ -15,26 +15,13 @@ data "azurerm_client_config" "current" {}
 
 # Create the Log Analytics Workspace for monitoring AKS
 resource "azurerm_log_analytics_workspace" "insights" {
-  name                                    = "logs-${random_pet.aksrandom_pet.id}-${var.project}-${var.environment}"
-  location                                = var.default_location
-  resource_group_name                     = var.resource_group_name
+  name                = "logs-${random_pet.aksrandom_pet.id}-${var.project}-${var.environment}"
+  location            = var.default_location
+  resource_group_name = var.resource_group_name
   #sku                                     = "free"
   retention_in_days                       = var.logs_retention_days
   immediate_data_purge_on_30_days_enabled = true
   tags                                    = var.tags
-}
-
-# Create the Administrators group in Azure AD
-resource "azuread_group" "aks_administrators" {
-  display_name     = "${var.project}-admin"
-  security_enabled = true
-}
-
-# Role Assignment for the AKS administrators group
-resource "azurerm_role_assignment" "aks_admin_assignment" {
-  principal_id         = azuread_group.aks_administrators.object_id
-  role_definition_name = "Azure Kubernetes Service RBAC Cluster Admin"
-  scope                = azurerm_kubernetes_cluster.aks_cluster.id
 }
 
 # AKS cluster creation
