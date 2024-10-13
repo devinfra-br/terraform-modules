@@ -1,5 +1,5 @@
 # Outputs the ID of the created Virtual Network (VNet)
 output "vnet_id" {
   description = "ID of the created Virtual Network (VNet)"
-  value       = azurerm_virtual_network.vnet.id
+  value       = azurerm_virtual_network.this.id
 }
