@@ -13,41 +13,6 @@ variable "vnet_name" {
   type        = string
 }
 
-variable "vnet_cidr" {
-  description = "The CIDR block for the Virtual Network"
-  type        = string
-}
-
-variable "subnet_name" {
-  description = "The name of the subnet"
-  type        = string
-}
-
-variable "subnet_cidr" {
-  description = "The CIDR block for the subnet"
-  type        = string
-}
-
-variable "vm_name" {
-  description = "The name of the Virtual Machine"
-  type        = string
-}
-
-variable "vm_size" {
-  description = "The size of the Virtual Machine (e.g., Standard_B2s)"
-  type        = string
-  default     = "Standard_B2s"
-}
-
-variable "admin_username" {
-  description = "Admin username for the Virtual Machine"
-  type        = string
-}
-
-variable "ssh_public_key" {
-  description = "The path to the SSH public key to be used for the VM"
-  type        = string
-}
 
 variable "tags" {
   description = "A mapping of tags to assign to the resource"
@@ -63,16 +28,13 @@ variable "project" {
 variable "environment" {
   description = "The environment name (e.g., dev, staging, prod)"
   type        = string
+  default     = "value"
 }
 
 variable "os_type" {
   description = "The operating system type for the VM (Linux or Windows)."
   type        = string
-}
-
-variable "network_security_group_id" {
-  description = "The ID of the network security group to associate with the VM."
-  type        = string
+  default     = "Linux"
 }
 
 variable "linux_image_publisher" {
@@ -111,7 +73,24 @@ variable "windows_image_sku" {
   default     = "2019-Datacenter"
 }
 
-variable "admin_password" {
-  description = "Admin password for the Windows Virtual Machine"
+variable "subnet_name" {
+  description = "The name of the subnet to deploy the VMs"
+  type        = string
+}
+
+variable "vms" {
+  type = map(object({
+    prefix         = string
+    vm_size        = string
+    os_type        = string
+    admin_username = string
+    admin_password = string # Only for Windows
+    ssh_public_key = string # Only for Linux
+  }))
+  description = "A map of virtual machines to create"
+}
+
+variable "resource_group_name_vnet" {
+  description = "The name of the resource group where the Virtual Network is located"
   type        = string
 }
