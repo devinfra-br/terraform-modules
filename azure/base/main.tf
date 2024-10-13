@@ -24,7 +24,7 @@ resource "azurerm_subnet" "subnets" {
 
   # Delegation block, applied only if delegation is defined for the subnet
   dynamic "delegation" {
-    for_each = try([each.value.delegation], [])
+     for_each = each.value.delegation != null ? [each.value.delegation] : []
     content {
       name = delegation.value.name
 
