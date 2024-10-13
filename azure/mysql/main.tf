@@ -1,7 +1,4 @@
-# Generate random resource group name
-resource "random_pet" "this" {}
-
-# Generate random value for the name
+# Generates a random string to use in resource names
 resource "random_string" "this" {
   length  = 6
   lower   = true
@@ -10,39 +7,28 @@ resource "random_string" "this" {
   upper   = false
 }
 
-# Generate random value for the login password
-resource "random_password" "this" {
-  length           = 16
-  lower            = true
-  min_lower        = 1
-  min_numeric      = 4
-  min_special      = 1
-  min_upper        = 1
-  numeric          = true
-  override_special = "_"
-  special          = true
-  upper            = true
-}
 
+# Data source to retrieve existing Virtual Network details
 data "azurerm_virtual_network" "this" {
   name                = var.vnet_name
   resource_group_name = var.resource_group_name_vnet
 }
 
+# Data source to retrieve an existing Subnet in the specified Virtual Network
 data "azurerm_subnet" "this" {
-  name                 = var.subnet_name # Substitua pelo nome da sua Subnet
+  name                 = var.subnet_name  # Name of the subnet
   virtual_network_name = var.vnet_name
   resource_group_name  = var.resource_group_name_vnet
 }
 
-# Enables you to manage Private DNS zones within Azure DNS
+# Create a Private DNS Zone for MySQL
 resource "azurerm_private_dns_zone" "this" {
   name                = "${var.project}-${var.environment}-${random_string.this.result}.mysql.database.azure.com"
   resource_group_name = var.resource_group_name
   tags                = var.tags
 }
 
-# Enables you to manage Private DNS zone Virtual Network Links
+# Links the Private DNS Zone to the specified Virtual Network
 resource "azurerm_private_dns_zone_virtual_network_link" "this" {
   name                  = "${var.project}-${var.environment}-${random_string.this.result}.com.br"
   private_dns_zone_name = azurerm_private_dns_zone.this.name
@@ -51,6 +37,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "this" {
   tags                  = var.tags
 }
 
+# Creates an Azure MySQL Flexible Server with necessary configurations
 resource "azurerm_mysql_flexible_server" "this" {
   name                   = "db-${var.project}-${var.environment}-${random_string.this.result}"
   resource_group_name    = var.resource_group_name
@@ -58,12 +45,13 @@ resource "azurerm_mysql_flexible_server" "this" {
   administrator_login    = var.admin_username
   administrator_password = var.admin_password
   backup_retention_days  = var.backup_retention_days
-  delegated_subnet_id    = data.azurerm_subnet.this.id
+  delegated_subnet_id    = data.azurerm_subnet.this.id  # Uses the retrieved subnet
   private_dns_zone_id    = azurerm_private_dns_zone.this.id
-  sku_name               = var.sku_name
+  sku_name               = var.sku_name  # SKU for the MySQL instance
   version                = var.mysql_version
   zone                   = 1
 
+  # Configures High Availability only if enabled
   dynamic "high_availability" {
     for_each = var.enable_high_availability ? [1] : []
     content {
@@ -71,11 +59,13 @@ resource "azurerm_mysql_flexible_server" "this" {
     }
   }
 
+  # Configures the storage settings for the MySQL server
   storage {
     iops    = var.storage_iops
     size_gb = var.storage_size_gb
   }
 
+  # Sets the maintenance window for the server
   maintenance_window {
     day_of_week  = var.maintenance_window_day_of_week
     start_hour   = var.maintenance_window_start_hour
@@ -86,33 +76,12 @@ resource "azurerm_mysql_flexible_server" "this" {
   tags       = var.tags
 }
 
-#resource "azurerm_mysql_flexible_database" "this" {
-#  name                = "db-${var.project}"
-#  resource_group_name = var.resource_group_name
-#  server_name         = azurerm_mysql_flexible_server.this.name
-#  charset             = "utf8mb4"
-#  collation           = "utf8mb4_unicode_ci"
-#}
-
+# Creates MySQL databases using a flexible server, iterating over a list of databases
 resource "azurerm_mysql_flexible_database" "this" {
-  for_each           = toset(var.databases)  # Iterar sobre a lista de nomes
-  name               = format("%s-%s", var.db_prefix, var.databases, each.value)  # Concatenar prefixo, projeto e nome
+  for_each           = toset(var.databases)  # Iterates over the list of database names
+  name               = format("%s_%s", var.db_prefix, each.value)  # Concatenates the prefix and database name
   resource_group_name = var.resource_group_name
   server_name        = azurerm_mysql_flexible_server.this.name
-  charset            = "utf8mb4"
-  collation          = "utf8mb4_unicode_ci"
-}
-
-resource "azurerm_private_endpoint" "example" {
-  name                = "${random_string.random.result}-endpoint"
-  location            = "Australia East"
-  resource_group_name = "MysqlResourceGroup"
-  subnet_id           = azurerm_subnet.example.id
-
-  private_service_connection {
-    name                           = "${random_string.random.result}-privateserviceconnection"
-    private_connection_resource_id = azurerm_mysql_server.example.id
-    subresource_names              = [ "mysqlServer" ]
-    is_manual_connection           = false
-  }
+  charset            = "utf8mb4"  # Specifies character set for the database
+  collation          = "utf8mb4_unicode_ci"  # Specifies collation for the database
 }
