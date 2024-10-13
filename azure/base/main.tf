@@ -1,57 +1,74 @@
-# Grupo de recursos
-# Rede Virtual
-resource "azurerm_virtual_network" "vnet" {
+# Generates a random string for resource naming to ensure uniqueness
+resource "random_string" "this" {
+  length  = 6
+  special = false
+  upper   = false
+}
+
+# Virtual Network (VNet) configuration
+resource "azurerm_virtual_network" "this" {
   name                = var.vnet_name
   resource_group_name = var.resource_group_name
   location            = var.location
-  address_space       = [var.vnet_cidr]
-  tags                = var.tags
+  address_space       = [var.vnet_cidr]  # Address range for the VNet
+  tags                = var.tags  # Tags for resource management
 }
 
-# Sub-rede applications
-resource "azurerm_subnet" "applications" {
-  name                 = var.subnets.applications.name
+# Subnet creation within the VNet
+resource "azurerm_subnet" "subnets" {
+  for_each             = var.subnets
+  name                 = each.value.name
   resource_group_name  = var.resource_group_name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = [var.subnets.applications.cidr]
-}
+  virtual_network_name = azurerm_virtual_network.this.name
+  address_prefixes     = [each.value.cidr]  # Address range for the subnet
 
-# Sub-net kubernetes
-resource "azurerm_subnet" "kubernetes" {
-  name                 = var.subnets.kubernetes.name
-  resource_group_name  = var.resource_group_name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = [var.subnets.kubernetes.cidr]
-}
+  # Delegation block, applied only if delegation is defined for the subnet
+  dynamic "delegation" {
+    for_each = try([each.value.delegation], [])
+    content {
+      name = delegation.value.name
 
-# Sub-net Databases
-resource "azurerm_subnet" "databases" {
-  name                 = var.subnets.databases.name
-  resource_group_name  = var.resource_group_name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = [var.subnets.databases.cidr]
-  delegation {
-    name = "delegation"
-
-    service_delegation {
-      name    = "Microsoft.DBforMySQL/flexibleServers"
-      actions = ["Microsoft.Network/virtualNetworks/subnets/join/action", "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action"]
+      # Service delegation actions
+      service_delegation {
+        name    = delegation.value.service_delegation.name
+        actions = delegation.value.service_delegation.actions
+      }
     }
   }
 }
 
-# Sub-net management
-resource "azurerm_subnet" "management" {
-  name                 = var.subnets.management.name
-  resource_group_name  = var.resource_group_name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = [var.subnets.management.cidr]
+## NAT Gateway Configuration
+
+# Public IP for the NAT Gateway
+resource "azurerm_public_ip" "this" {
+  count               = var.create_nat_gateway ? 1 : 0  # Create Public IP only if NAT Gateway is enabled
+  name                = "nat-gtw-${var.project}-${var.environment}-${random_string.this.result}"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  allocation_method   = "Static"  # Static IP allocation for the NAT Gateway
+  sku                 = "Standard"
+  tags                = var.tags
 }
 
-# Sub-net public
-resource "azurerm_subnet" "public" {
-  name                 = var.subnets.public.name
-  resource_group_name  = var.resource_group_name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = [var.subnets.public.cidr]
+# NAT Gateway resource
+resource "azurerm_nat_gateway" "this" {
+  count               = var.create_nat_gateway ? 1 : 0  # Create NAT Gateway only if enabled
+  name                = "nat-gtw-${var.project}-${var.environment}-${random_string.this.result}"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  tags                = var.tags  # Tags for resource management
+}
+
+# Associate Public IP with NAT Gateway
+resource "azurerm_nat_gateway_public_ip_association" "this" {
+  count                = var.create_nat_gateway ? 1 : 0  # Associate only if NAT Gateway is created
+  nat_gateway_id       = azurerm_nat_gateway.this[0].id  # NAT Gateway ID
+  public_ip_address_id = azurerm_public_ip.this[0].id  # Public IP ID
+}
+
+# Associate Subnets with NAT Gateway
+resource "azurerm_subnet_nat_gateway_association" "nat_association" {
+  for_each       = { for key, value in var.subnets : key => value if value.use_nat_gateway }  # Associate only subnets that require NAT Gateway
+  subnet_id      = azurerm_subnet.subnets[each.key].id  # Subnet ID
+  nat_gateway_id = azurerm_nat_gateway.this[0].id  # NAT Gateway ID
 }
