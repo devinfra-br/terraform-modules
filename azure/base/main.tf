@@ -31,7 +31,7 @@ resource "azurerm_subnet" "subnets" {
       # Service delegation actions
       service_delegation {
         name    = delegation.value.service_delegation.name
-        actions = try(delegation.value.service_delegation.actions, ["Microsoft.Network/virtualNetworks/subnets/join/action"])
+        actions = try(delegation.value.service_delegation.actions)
       }
     }
   }
