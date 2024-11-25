@@ -74,7 +74,7 @@ resource "azurerm_mysql_flexible_server" "this" {
     start_minute = var.maintenance_window_start_minute
   }
 
-  depends_on = [azurerm_private_dns_zone_virtual_network_link.this]
+  #depends_on = [azurerm_private_dns_zone_virtual_network_link.this]
   tags       = var.tags
 }
 
