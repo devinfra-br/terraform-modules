@@ -47,7 +47,7 @@ resource "azurerm_mysql_flexible_server" "this" {
   administrator_password        = var.admin_password
   backup_retention_days         = var.backup_retention_days
   delegated_subnet_id           = data.azurerm_subnet.this.id # Uses the retrieved subnet
-  private_dns_zone_id           = azurerm_private_dns_zone.this.id
+  #private_dns_zone_id           = azurerm_private_dns_zone.this.id
   sku_name                      = var.sku_name # SKU for the MySQL instance
   version                       = var.mysql_version
   #public_network_access_enabled = var.public_access # Disables public network access
