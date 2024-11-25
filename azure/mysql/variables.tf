@@ -174,3 +174,9 @@ variable "databases" {
   type        = list(string)
   default     = []
 }
+
+variable "public_access" {
+  description = "Habilitar acesso público ao banco de dados"
+  type        = bool
+  default     = false
+}
